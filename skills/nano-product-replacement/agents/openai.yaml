@@ -1,0 +1,4 @@
+interface:
+  display_name: "nano 产品替换"
+  short_description: "先完整涂黑旧产品，再按实物参考修复产品形态与纹理并交付候选图"
+  default_prompt: "使用 $nano-product-replacement，按我提供的实物参考替换场景图中的产品。"

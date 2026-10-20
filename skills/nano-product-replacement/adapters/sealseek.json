@@ -1,0 +1,66 @@
+{
+  "schema": "portable-skill-adapter",
+  "platform": "sealseek",
+  "mappings": [
+    {
+      "capability_id": "workspace.files",
+      "status": "implemented",
+      "features": [
+        "read",
+        "exclusive-write"
+      ],
+      "implementation": {
+        "kind": "cli",
+        "instructions": "Use advertised file tools. Inspect target metadata and preserve all existing files."
+      }
+    },
+    {
+      "capability_id": "image.inspect",
+      "status": "implemented",
+      "features": [
+        "local-images",
+        "detail-inspection"
+      ],
+      "implementation": {
+        "kind": "instruction",
+        "instructions": "Use the host advertised local image viewing capability. Inspect every image and crop at full detail when needed. Missing visual inspection is a reported gap."
+      }
+    },
+    {
+      "capability_id": "local.images",
+      "status": "implemented",
+      "features": [
+        "polygon-grow",
+        "protect",
+        "collect-hashes",
+        "comparison-sheet"
+      ],
+      "implementation": {
+        "kind": "cli",
+        "instructions": "Use nano-product-replacement doctor, blackout and collect. Resolve CLI from the installed package and verify version."
+      }
+    },
+    {
+      "capability_id": "media.generate",
+      "status": "implemented",
+      "features": [
+        "ordered-references",
+        "task-recovery",
+        "local-artifacts"
+      ],
+      "implementation": {
+        "kind": "instruction",
+        "instructions": "Follow current human choice and host routing. Codex uses built-in image generation by default; explicit SealSeek selection dynamically loads sealseek-media via its skill source contract. Preserve model intent; if unavailable return FEATURE_UNSUPPORTED. Normalize real returned task IDs and artifacts."
+      }
+    }
+  ],
+  "os_evidence": "Implementation only; host and OS evidence recorded separately in release QA. No paid generation tested.",
+  "normalization": {
+    "ok": true,
+    "artifacts": [],
+    "metadata": {},
+    "task_id": null,
+    "cost": null,
+    "warnings": []
+  }
+}

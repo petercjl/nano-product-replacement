@@ -1,0 +1,38 @@
+{
+  "name": "@petercjl/nano-product-replacement",
+  "version": "0.1.0-dev.0",
+  "description": "Reference-based product replacement workflow with portable local masking and managed Agent Skills.",
+  "type": "module",
+  "bin": {
+    "nano-product-replacement": "bin/nano-product-replacement.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/petercjl/nano-product-replacement.git"
+  },
+  "homepage": "https://github.com/petercjl/nano-product-replacement#readme",
+  "bugs": {
+    "url": "https://github.com/petercjl/nano-product-replacement/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check bin/nano-product-replacement.mjs && npm test"
+  },
+  "dependencies": {
+    "sharp": "0.35.5"
+  }
+}

@@ -1,0 +1,17 @@
+name: Cross-platform package QA
+on: [push, pull_request]
+jobs:
+  qa:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm test
+      - run: node scripts/packed-smoke.mjs

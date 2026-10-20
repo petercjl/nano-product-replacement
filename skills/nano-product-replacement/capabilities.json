@@ -1,0 +1,134 @@
+{
+  "schema": "portable-skill-capabilities",
+  "schema_version": "1.0.0",
+  "skill": "nano-product-replacement",
+  "target_platforms": [
+    "codex",
+    "sealseek"
+  ],
+  "capabilities": [
+    {
+      "id": "workspace.files",
+      "purpose": "保留原件与任务记录",
+      "required": true,
+      "required_features": [
+        "read",
+        "exclusive-write"
+      ],
+      "input_fields": [
+        "request"
+      ],
+      "output_fields": [
+        "ok",
+        "artifacts",
+        "metadata",
+        "task_id",
+        "cost",
+        "warnings"
+      ],
+      "side_effects": {
+        "external_mutation": false,
+        "may_cost_money": false,
+        "authorization": "Local processing within requested workspace; generation only within explicit human generation authorization and host routing."
+      },
+      "errors": [
+        "CAPABILITY_UNAVAILABLE",
+        "FEATURE_UNSUPPORTED",
+        "OUTPUT_CONTRACT_FAILED"
+      ]
+    },
+    {
+      "id": "image.inspect",
+      "purpose": "实际查看场景、实物、涂黑底图和全部结果",
+      "required": true,
+      "required_features": [
+        "local-images",
+        "detail-inspection"
+      ],
+      "input_fields": [
+        "request"
+      ],
+      "output_fields": [
+        "ok",
+        "artifacts",
+        "metadata",
+        "task_id",
+        "cost",
+        "warnings"
+      ],
+      "side_effects": {
+        "external_mutation": false,
+        "may_cost_money": false,
+        "authorization": "Local processing within requested workspace; generation only within explicit human generation authorization and host routing."
+      },
+      "errors": [
+        "CAPABILITY_UNAVAILABLE",
+        "FEATURE_UNSUPPORTED",
+        "OUTPUT_CONTRACT_FAILED"
+      ]
+    },
+    {
+      "id": "local.images",
+      "purpose": "确定性遮挡与结果核验对比图",
+      "required": true,
+      "required_features": [
+        "polygon-grow",
+        "protect",
+        "collect-hashes",
+        "comparison-sheet"
+      ],
+      "input_fields": [
+        "request"
+      ],
+      "output_fields": [
+        "ok",
+        "artifacts",
+        "metadata",
+        "task_id",
+        "cost",
+        "warnings"
+      ],
+      "side_effects": {
+        "external_mutation": false,
+        "may_cost_money": false,
+        "authorization": "Local processing within requested workspace; generation only within explicit human generation authorization and host routing."
+      },
+      "errors": [
+        "CAPABILITY_UNAVAILABLE",
+        "FEATURE_UNSUPPORTED",
+        "OUTPUT_CONTRACT_FAILED"
+      ]
+    },
+    {
+      "id": "media.generate",
+      "purpose": "按人类与宿主选择的媒体能力执行生成",
+      "required": true,
+      "required_features": [
+        "ordered-references",
+        "task-recovery",
+        "local-artifacts"
+      ],
+      "input_fields": [
+        "request"
+      ],
+      "output_fields": [
+        "ok",
+        "artifacts",
+        "metadata",
+        "task_id",
+        "cost",
+        "warnings"
+      ],
+      "side_effects": {
+        "external_mutation": true,
+        "may_cost_money": true,
+        "authorization": "Local processing within requested workspace; generation only within explicit human generation authorization and host routing."
+      },
+      "errors": [
+        "CAPABILITY_UNAVAILABLE",
+        "FEATURE_UNSUPPORTED",
+        "OUTPUT_CONTRACT_FAILED"
+      ]
+    }
+  ]
+}

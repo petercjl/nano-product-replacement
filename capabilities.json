@@ -185,5 +185,26 @@
     "recovery": "Offline/timeout retains installation and caches failure for 24h; concurrent checks use an exclusive lock; malformed user state is preserved.",
     "installation": "explicit-only",
     "channel": "latest"
+  },
+  "generationWorkflow": {
+    "owner": "application-skill",
+    "execution": "sequential-single-image-iterations",
+    "imagesPerRequest": 1,
+    "defaultMaxRounds": 4,
+    "hardMaxRounds": 4,
+    "stopOnAcceptance": true,
+    "references": "Reuse the fixed initial ordered reference list in every round. Generated outputs are inspection evidence only.",
+    "nextRound": "After visual inspection, revise the complete prompt from observed issues and submit one image within the remaining authorized budget.",
+    "recovery": "Resume the same task after an uncertain outcome. Technical failures do not trigger a new paid round automatically.",
+    "records": [
+      "round",
+      "prompt",
+      "reference_paths_and_hashes",
+      "task_id",
+      "artifacts",
+      "visual_review",
+      "decision",
+      "cost"
+    ]
   }
 }

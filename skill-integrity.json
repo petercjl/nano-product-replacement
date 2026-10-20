@@ -1,10 +1,10 @@
 {
-  "SKILL.md": "f1fe9fd1630f2379556cda0c872943030752f71e4c93bdfbb8f5a4de3dab0bea",
+  "SKILL.md": "8e4786f75fc8c3c61df574285463b16090b48e918fefef6a593f716237c9065b",
   "adapters/codex.json": "a251fa5d755ae62d6d74a182ab794fa990ba147821796c3318f6070b2951e637",
   "adapters/generic.json": "ee3fbca5ae89aa7821657a2fcc8de3c63a7d657f70187d393b0330c450ae4e24",
   "adapters/sealseek.json": "da15d7ba90d316fa34ecf5967b6588e0dd778c737d654840b040dcb1348382cf",
   "agents/openai.yaml": "82826328f09d4dae84b783fe0fe86d9dd84fed8476b817ff370842ff088dbe27",
   "capabilities.json": "1b95070c78794bdbc8b8552d55b138024182e4190d22af52a7372f77df513d65",
   "references/local-processing.md": "b66d06e20dcb8695e491d81a3cc51868f3e96a8af0bbd46a96a23f1f1a461418",
-  "references/sealseek-handoff.md": "0e51eae87598f04d1744bf94bc1ee48835fe07e2203a8fd83ef45989a83d305a"
+  "references/sealseek-handoff.md": "80d6c76ced5b882f51deb9a2874c1385d170a9fa410fdaa6f71331ae6759ecf7"
 }

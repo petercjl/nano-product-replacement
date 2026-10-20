@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { SOURCE, PACKAGE, exists, fail, hashes, packageInfo, readJSON, writeNew } from './common.mjs';
+import { SOURCE, ROOT, PACKAGE, exists, fail, hashes, packageInfo, readJSON, writeNew } from './common.mjs';
 const MARKER='.nano-install.json';
 export function targetFor(agent,home){
  if(!['codex','sealseek'].includes(agent))fail('UNKNOWN_TARGET','Use codex or sealseek.');
@@ -13,7 +13,10 @@ export async function status({agent='codex',home,source=SOURCE}={}){
  if(!st)return {ok:true,installed:false,managed:false,target,source};
  if(st.isSymbolicLink()){
   const actual=await fs.realpath(target).catch(()=>null),expected=await fs.realpath(source);
-  return {ok:true,installed:true,managed:actual===expected,mode:'link',target,source,actual,up_to_date:actual===expected};
+  const baseline=source===SOURCE?await readJSON(path.join(ROOT,'skill-integrity.json')):await hashes(source);
+  const current=actual===expected?await hashes(source):{};
+  const edited=Object.keys({...baseline,...current}).filter(k=>baseline[k]!==current[k]);
+  return {ok:true,installed:true,managed:actual===expected,mode:'link',target,source,actual,edited,up_to_date:actual===expected&&!edited.some(k=>k!=='agents/openai.yaml')};
  }
  const m=await readJSON(path.join(target,MARKER)).catch(()=>null);
  if(m?.package!==PACKAGE)return {ok:true,installed:true,managed:false,target,source};

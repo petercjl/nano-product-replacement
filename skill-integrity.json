@@ -1,0 +1,9 @@
+{
+  "SKILL.md": "4871fa9d087d9b9d7b8e0cc921c56dc81977fe88900495c628671ccf9c25e71c",
+  "adapters/codex.json": "a5524f6a11687d142b6ccb9f64370e37447e01adfbd0e269fd52f3c5eb7917e6",
+  "adapters/sealseek.json": "e0034c8bcfc70d16804fcfc479a7b46fd66cf277d135a719bdae0b303005fa96",
+  "agents/openai.yaml": "82826328f09d4dae84b783fe0fe86d9dd84fed8476b817ff370842ff088dbe27",
+  "capabilities.json": "219b469e0a7e8ecdbb507e11d22d403eb3e4345d2664964e25494c5761f9953d",
+  "references/local-processing.md": "b0e46d16d74b2c806d914893773329865e3fb77d9483ead21cd7c5e19f5414a9",
+  "references/sealseek-handoff.md": "0e51eae87598f04d1744bf94bc1ee48835fe07e2203a8fd83ef45989a83d305a"
+}

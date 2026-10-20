@@ -11,7 +11,8 @@
     "src",
     "skills",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "skill-integrity.json"
   ],
   "engines": {
     "node": ">=22"

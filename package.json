@@ -10,6 +10,7 @@
     "bin",
     "src",
     "skills",
+    "capabilities.json",
     "README.md",
     "LICENSE",
     "skill-integrity.json"

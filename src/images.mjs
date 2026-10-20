@@ -2,35 +2,19 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { exists, fail, readJSON, writeNew, hash } from './common.mjs';
-function finite(n) { return typeof n === 'number' && Number.isFinite(n); }
-function polygon(p, sx, sy, growDefault) {
- if (!Array.isArray(p?.points) || p.points.length < 3 || p.points.some(a => !Array.isArray(a) || a.length !== 2 || !a.every(finite))) fail('INVALID_REGIONS', 'Each polygon needs at least three finite [x,y] pairs.');
- const grow = p.grow ?? growDefault;
- if (!finite(grow) || grow < 0) fail('INVALID_REGIONS', 'grow must be finite and nonnegative.');
- return `<polygon points="${p.points.map(([x,y]) => `${x*sx},${y*sy}`).join(' ')}" stroke-width="${2*grow*(sx+sy)/2}" stroke-linejoin="round"/>`;
-}
+import {validateRegions,regionMasks} from './regions.mjs';
 export async function blackout({ source, regions, output, maskOutput }) {
  if (!source || !regions || !output) fail('INVALID_INPUT', 'source, regions and output are required.');
  const targets = [output, maskOutput].filter(Boolean).map(p => path.resolve(p));
  if (new Set(targets).size !== targets.length) fail('INVALID_INPUT', 'Output paths must differ.');
  for (const p of targets) { if (await exists(p)) fail('OUTPUT_EXISTS', `Preserving ${p}`); if (path.extname(p).toLowerCase() !== '.png') fail('INVALID_INPUT', 'Outputs must use .png.'); }
- const cfg = await readJSON(regions);
- const cw = cfg.coordinate_width, ch = cfg.coordinate_height;
- if (!finite(cw) || !finite(ch) || cw <= 0 || ch <= 0 || !Array.isArray(cfg.cover) || !cfg.cover.length || (cfg.protect !== undefined && !Array.isArray(cfg.protect))) fail('INVALID_REGIONS', 'Positive coordinate dimensions, cover polygons and optional protect array required.');
- const feather = cfg.feather ?? 0;
- if (!Number.isInteger(feather) || feather < 0 || feather > 20) fail('INVALID_REGIONS', 'feather must be an integer from 0 to 20.');
  const decoded = await sharp(source, { limitInputPixels: 100_000_000 }).rotate().ensureAlpha().raw().toBuffer({ resolveWithObject: true });
- const { width, height } = decoded.info, sx = width / cw, sy = height / ch;
- if (Math.abs(sx/sy - 1) > .005) fail('INVALID_REGIONS', 'Coordinate aspect ratio differs from the oriented image.');
- const grow = Math.min(cw, ch) * .015;
- const svg = (color, polys, d) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="black"/><g fill="${color}" stroke="${color}">${polys.map(p => polygon(p,sx,sy,d)).join('')}</g></svg>`);
- let maskPipe = sharp(svg('white', cfg.cover, grow)).removeAlpha().greyscale();
- if (feather) maskPipe = maskPipe.blur(Math.max(.3, feather/2));
- const mask = await maskPipe.raw().toBuffer();
- const protect = cfg.protect?.length ? await sharp(svg('white',cfg.protect,0)).removeAlpha().greyscale().raw().toBuffer() : null;
+ const { width, height } = decoded.info;
+ const cfg=validateRegions(await readJSON(regions),width,height),{feather}=cfg;
+ const grow=Math.min(cfg.coordinate_width,cfg.coordinate_height)*.015;
+ const {mask}=await regionMasks(cfg,decoded.data);
  const pixels = decoded.data;
  for (let i=0;i<mask.length;i++) {
-  if (protect) mask[i] = Math.round(mask[i] * (1 - protect[i]/255));
   const a=mask[i]/255, j=i*4;
   for (let c=0;c<3;c++) pixels[j+c]=Math.round(pixels[j+c]*(1-a));
   pixels[j+3]=Math.round(pixels[j+3]+(255-pixels[j+3])*a);

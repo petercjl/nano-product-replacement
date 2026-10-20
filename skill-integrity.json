@@ -1,9 +1,10 @@
 {
-  "SKILL.md": "4871fa9d087d9b9d7b8e0cc921c56dc81977fe88900495c628671ccf9c25e71c",
-  "adapters/codex.json": "a5524f6a11687d142b6ccb9f64370e37447e01adfbd0e269fd52f3c5eb7917e6",
-  "adapters/sealseek.json": "e0034c8bcfc70d16804fcfc479a7b46fd66cf277d135a719bdae0b303005fa96",
+  "SKILL.md": "f1fe9fd1630f2379556cda0c872943030752f71e4c93bdfbb8f5a4de3dab0bea",
+  "adapters/codex.json": "a251fa5d755ae62d6d74a182ab794fa990ba147821796c3318f6070b2951e637",
+  "adapters/generic.json": "ee3fbca5ae89aa7821657a2fcc8de3c63a7d657f70187d393b0330c450ae4e24",
+  "adapters/sealseek.json": "da15d7ba90d316fa34ecf5967b6588e0dd778c737d654840b040dcb1348382cf",
   "agents/openai.yaml": "82826328f09d4dae84b783fe0fe86d9dd84fed8476b817ff370842ff088dbe27",
-  "capabilities.json": "219b469e0a7e8ecdbb507e11d22d403eb3e4345d2664964e25494c5761f9953d",
-  "references/local-processing.md": "b0e46d16d74b2c806d914893773329865e3fb77d9483ead21cd7c5e19f5414a9",
+  "capabilities.json": "1b95070c78794bdbc8b8552d55b138024182e4190d22af52a7372f77df513d65",
+  "references/local-processing.md": "b66d06e20dcb8695e491d81a3cc51868f3e96a8af0bbd46a96a23f1f1a461418",
   "references/sealseek-handoff.md": "0e51eae87598f04d1744bf94bc1ee48835fe07e2203a8fd83ef45989a83d305a"
 }

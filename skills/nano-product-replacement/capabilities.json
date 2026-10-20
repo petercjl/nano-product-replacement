@@ -4,7 +4,8 @@
   "skill": "nano-product-replacement",
   "target_platforms": [
     "codex",
-    "sealseek"
+    "sealseek",
+    "generic"
   ],
   "capabilities": [
     {
@@ -75,7 +76,10 @@
         "polygon-grow",
         "protect",
         "collect-hashes",
-        "comparison-sheet"
+        "comparison-sheet",
+        "coordinate-inspection",
+        "simple-polygon-validation",
+        "local-warm-pixel-protection"
       ],
       "input_fields": [
         "request"
@@ -130,5 +134,9 @@
         "OUTPUT_CONTRACT_FAILED"
       ]
     }
-  ]
+  ],
+  "host_resolution": {
+    "fallback_adapter": "generic",
+    "destination": "Caller resolves exact target-directory for unnamed hosts."
+  }
 }

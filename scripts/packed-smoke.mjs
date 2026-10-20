@@ -4,6 +4,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 const dir=await fs.mkdtemp(path.join(os.tmpdir(),'nano-packed-'));
+process.env.NANO_PRODUCT_REPLACEMENT_UPDATE_CHECK='0';
 function run(exe,args,cwd=process.cwd(),env=process.env){const r=spawnSync(exe,args,{cwd,env,encoding:'utf8',timeout:120000,windowsHide:true,shell:process.platform==='win32'&&exe==='npm'});if(r.status!==0)throw Error(`${exe} ${args.join(' ')}: ${r.stderr||r.stdout}`);return r.stdout;}
 try{
  const pack=JSON.parse(run('npm',['pack','--json','--pack-destination',dir]))[0];
@@ -20,6 +21,7 @@ try{
  await fs.writeFile(input,await sharp({create:{width:60,height:40,channels:3,background:'pink'}}).png().toBuffer(),{flag:'wx'});
  await fs.writeFile(regions,JSON.stringify({coordinate_width:60,coordinate_height:40,cover:[{points:[[5,5],[50,5],[50,35],[5,35]]}]}),{flag:'wx'});
  assert.equal(call('blackout','--source',input,'--regions',regions,'--output',output).width,60);
+ assert.equal(call('inspect','--source',input,'--regions',regions,'--output-directory',path.join(dir,'inspection')).width,60);
  const task=path.join(dir,'task.json');await fs.writeFile(task,JSON.stringify({status:'succeeded',artifacts:[{path:output},{path:input}]}),{flag:'wx'});
  const report=call('collect','--task-json',task,'--output-directory',path.join(dir,'delivery'));assert.equal(report.actual_count,2);assert.ok(await fs.stat(report.comparison));
  // Installed entry has no development tools. Missing native runtime must be explicit.

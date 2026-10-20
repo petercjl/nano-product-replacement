@@ -33,11 +33,14 @@
         "polygon-grow",
         "protect",
         "collect-hashes",
-        "comparison-sheet"
+        "comparison-sheet",
+        "coordinate-inspection",
+        "simple-polygon-validation",
+        "local-warm-pixel-protection"
       ],
       "implementation": {
         "kind": "cli",
-        "instructions": "Use nano-product-replacement doctor, blackout and collect. Resolve CLI from the installed package and verify version."
+        "instructions": "Use nano-product-replacement doctor, capabilities, inspect, blackout and collect. Resolve the installed CLI and verify required features. Use inspect coordinate/overlay/crop artifacts and shared polygon validation; ordinary runs do not import package dependencies or write image algorithms."
       }
     },
     {

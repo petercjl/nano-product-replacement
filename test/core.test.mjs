@@ -9,6 +9,7 @@ import { blackout, collect } from '../src/images.mjs';
 import { install, status, targetFor } from '../src/lifecycle.mjs';
 import { SOURCE, hash, writeNew } from '../src/common.mjs';
 import { doctor } from '../src/doctor.mjs';
+process.env.NANO_PRODUCT_REPLACEMENT_UPDATE_CHECK='0';
 async function temp(t){const p=await fs.mkdtemp(path.join(os.tmpdir(),'nano-test-'));t.after(()=>fs.rm(p,{recursive:true,force:true}));return p;}
 async function image(p,color='white',w=100,h=80){await writeNew(p,await sharp({create:{width:w,height:h,channels:3,background:color}}).png().toBuffer());}
 const cfg={coordinate_width:100,coordinate_height:80,cover:[{points:[[20,20],[60,20],[60,60],[20,60]]}],protect:[{points:[[30,30],[40,30],[40,40],[30,40]]}],feather:0};

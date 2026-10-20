@@ -1,0 +1,69 @@
+{
+  "schema": "portable-skill-adapter",
+  "platform": "generic",
+  "mappings": [
+    {
+      "capability_id": "workspace.files",
+      "status": "implemented",
+      "features": [
+        "read",
+        "exclusive-write"
+      ],
+      "implementation": {
+        "kind": "cli",
+        "instructions": "Resolve own Skill directory from advertised host configuration and pass its exact path using --target-directory. Preserve existing files and use package-managed source/status/install/update commands."
+      }
+    },
+    {
+      "capability_id": "image.inspect",
+      "status": "implemented",
+      "features": [
+        "local-images",
+        "detail-inspection"
+      ],
+      "implementation": {
+        "kind": "instruction",
+        "instructions": "Use the host advertised local image viewing capability. Inspect every image and crop at full detail when needed. Missing visual inspection is a reported gap."
+      }
+    },
+    {
+      "capability_id": "local.images",
+      "status": "implemented",
+      "features": [
+        "polygon-grow",
+        "protect",
+        "collect-hashes",
+        "comparison-sheet",
+        "coordinate-inspection",
+        "simple-polygon-validation",
+        "local-warm-pixel-protection"
+      ],
+      "implementation": {
+        "kind": "cli",
+        "instructions": "Use nano-product-replacement doctor, capabilities, inspect, blackout and collect. Resolve the installed CLI and verify required features. Use inspect coordinate/overlay/crop artifacts and shared polygon validation; ordinary runs do not import package dependencies or write image algorithms."
+      }
+    },
+    {
+      "capability_id": "media.generate",
+      "status": "implemented",
+      "features": [
+        "ordered-references",
+        "task-recovery",
+        "local-artifacts"
+      ],
+      "implementation": {
+        "kind": "instruction",
+        "instructions": "Follow the explicit human model/provider selection and advertised host media capability. When SealSeek is explicitly selected, resolve and fully read sealseek-media through its skill source contract. Return FEATURE_UNSUPPORTED for missing required features."
+      }
+    }
+  ],
+  "os_evidence": "Portable CLI contract only; resolve host image inspection and generation capabilities before use. No named host/OS runtime evidence.",
+  "normalization": {
+    "ok": true,
+    "artifacts": [],
+    "metadata": {},
+    "task_id": null,
+    "cost": null,
+    "warnings": []
+  }
+}

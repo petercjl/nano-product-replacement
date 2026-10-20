@@ -1,0 +1,189 @@
+{
+  "commandContracts": {
+    "inspect": {
+      "options": {
+        "--source": {
+          "type": "string"
+        },
+        "--regions": {
+          "type": "string"
+        },
+        "--output-directory": {
+          "type": "string"
+        },
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "local-write"
+    },
+    "blackout": {
+      "options": {
+        "--source": {
+          "type": "string"
+        },
+        "--regions": {
+          "type": "string"
+        },
+        "--output": {
+          "type": "string"
+        },
+        "--mask-output": {
+          "type": "string"
+        },
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "local-write"
+    },
+    "collect": {
+      "options": {
+        "--task-json": {
+          "type": "string"
+        },
+        "--output-directory": {
+          "type": "string"
+        },
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "local-write"
+    },
+    "skill install": {
+      "options": {
+        "--agent": {
+          "type": "string"
+        },
+        "--home": {
+          "type": "string"
+        },
+        "--target-directory": {
+          "type": "string"
+        },
+        "--mode": {
+          "type": "string"
+        },
+        "--backup-edits": {
+          "type": "boolean"
+        },
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "local-write"
+    },
+    "skill update": {
+      "options": {
+        "--agent": {
+          "type": "string"
+        },
+        "--home": {
+          "type": "string"
+        },
+        "--target-directory": {
+          "type": "string"
+        },
+        "--mode": {
+          "type": "string"
+        },
+        "--backup-edits": {
+          "type": "boolean"
+        },
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "local-write"
+    },
+    "skill status": {
+      "options": {
+        "--agent": {
+          "type": "string"
+        },
+        "--home": {
+          "type": "string"
+        },
+        "--target-directory": {
+          "type": "string"
+        },
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "skill source": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "version": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "doctor": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "capabilities": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "update status": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "update check": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "update install": {
+      "options": {
+        "--yes": {
+          "type": "boolean"
+        },
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "package-and-skill-update"
+    }
+  },
+  "automaticUpdates": {
+    "enabledByDefault": true,
+    "intervalHours": 24,
+    "timeoutMs": 1500,
+    "defaultMode": "notify",
+    "trigger": "Successful ordinary inspect or blackout entry; version/help/capability discovery and polling remain offline.",
+    "configuration": "User-level package state directory; optional NANO_PRODUCT_REPLACEMENT_STATE_DIR override. update status exposes effective policy.",
+    "disable": "NANO_PRODUCT_REPLACEMENT_UPDATE_CHECK=0",
+    "recovery": "Offline/timeout retains installation and caches failure for 24h; concurrent checks use an exclusive lock; malformed user state is preserved.",
+    "installation": "explicit-only",
+    "channel": "latest"
+  }
+}

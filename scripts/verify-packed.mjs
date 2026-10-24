@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 const root=path.resolve(import.meta.dirname,'..'),pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'))),config=pkg.skillLifecycle;
@@ -80,11 +79,14 @@ try {
   const input=path.join(dir,'comparison.json');fs.writeFileSync(input,JSON.stringify({run_id:'isolated',row_index:1,top:0,source:{url:'https://example.com/source.png',width:600,height:900},result:{url:'https://example.com/result.png',width:600,height:900}}),{flag:'wx'});
   assert.equal(body(survivor,['canvas','row','--input',input]).batch.media.length,2);operation='comparison canvas row calculation';
  }else{
-  const require=createRequire(path.join(runtime,'package.json')),sharp=require('sharp');
   const input=path.join(dir,'原图.png'),regions=path.join(dir,'区域.json'),output=path.join(dir,'涂黑.png');
-  fs.writeFileSync(input,await sharp({create:{width:60,height:40,channels:3,background:'pink'}}).png().toBuffer(),{flag:'wx'});
+  // Native DLLs remain mapped until process exit on Windows. Keep image probes in
+  // disposable children so the parent can verify cleanup of its isolated install.
+  const sharpScript=`import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {createRequire} from 'node:module';const [runtime,input,output,mode]=process.argv.slice(1);const sharp=createRequire(path.join(runtime,'package.json'))('sharp');if(mode==='create')fs.writeFileSync(input,await sharp({create:{width:60,height:40,channels:3,background:'pink'}}).png().toBuffer(),{flag:'wx'});else{assert.equal((await sharp(output).metadata()).height,40);const {data,info}=await sharp(output).raw().toBuffer({resolveWithObject:true});assert.equal(data[(20*info.width+20)*info.channels],0);}`;
+  const imageProbe=mode=>{const q=spawnSync(process.execPath,['--input-type=module','-e',sharpScript,runtime,input,output,mode],{env,encoding:'utf8',timeout:30000,windowsHide:true});assert.equal(q.status,0,q.stderr);};
+  imageProbe('create');
   fs.writeFileSync(regions,JSON.stringify({coordinate_width:60,coordinate_height:40,cover:[{points:[[5,5],[50,5],[50,35],[5,35]]}]}),{flag:'wx'});
-  assert.equal(body(survivor,['blackout','--source',input,'--regions',regions,'--output',output]).width,60);assert.equal((await sharp(output).metadata()).height,40);operation='local product blackout writes and verifies actual image';
+  assert.equal(body(survivor,['blackout','--source',input,'--regions',regions,'--output',output]).width,60);imageProbe('verify');operation='local product blackout writes and verifies actual image';
  }
  console.log(JSON.stringify({ok:true,package:pkg.name,version:pkg.version,packedInstall:true,scriptsDisabled:true,independentRuntime:true,bootstrapRemoved:true,otherHostRemoved:true,identityDriftRejected:true,realNpmCandidateAcquisition:true,partialFailure:true,packedLocalEditsProtected:true,resourceSetDriftRejected:true,repeatedRecovery:true,originalBackupPreserved:true,rollback:true,rollbackFailureRecovery:true,candidateIdentityProtected:true,acquisitionFailureRecovery:true,unknownActivatedResultRecovered:true,ordinaryEntryDetection:true,persistentThrottle:true,missingRuntimeRefused:true,businessSmoke:operation,hostDiscovery:'not-attested',platform:process.platform},null,2));
 }finally{fs.rmSync(dir,{recursive:true,force:true});}

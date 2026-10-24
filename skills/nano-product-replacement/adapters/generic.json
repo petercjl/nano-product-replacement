@@ -40,7 +40,7 @@
       ],
       "implementation": {
         "kind": "cli",
-        "instructions": "Use nano-product-replacement doctor, capabilities, inspect, blackout and collect. Resolve the installed CLI and verify required features. Use inspect coordinate/overlay/crop artifacts and shared polygon validation; ordinary runs do not import package dependencies or write image algorithms."
+        "instructions": "Use nano-product-replacement doctor, capabilities, inspect, blackout and collect. Resolve this installed Skill’s local scripts/run.mjs and verify required features. Use inspect coordinate/overlay/crop artifacts and shared polygon validation; ordinary runs do not import package dependencies or write image algorithms."
       }
     },
     {

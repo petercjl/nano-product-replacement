@@ -1,9 +1,21 @@
 ---
 name: nano-product-replacement
 description: 按实物参考替换已有场景图中的产品，先完整涂黑旧产品并保护人物，再修复产品形态与纹理，检查并交付全部结果。用于 nano 产品替换、同款产品细节修复等已有场景与实物参考的任务。
+metadata:
+  package: "@petercjl/nano-product-replacement"
+  version: 0.2.2
 ---
 
 # nano 产品替换
+
+## Package installation and local execution
+
+The owning npm package is the canonical source. Installation instructions are in its INSTALL.md and UPDATE.md before Skill loading. Resolve the current Agent's supported Skill directory and use explicit `--path` with package-managed install/status/update. Named Agent identities describe conventions, not eligibility or directory defaults.
+
+After managed installation, invoke this Skill's `scripts/run.mjs` with the current Node.js runtime for every owning-package CLI command below. The launcher uses the target-owned `.runtime` and bundled dependencies. Resolve this launcher relative to this Skill's actual directory; do not fall back to a shared global package when the installed runtime is missing. External service dependencies are declared separately and resolve their own canonical Skill through their documented CLI contract.
+
+Maintenance completes CLI/runtime and Skill verification, followed by host-native reload and discovery. CLI receipts leave host discovery pending. Automatic checks notify by default; installation requires separate standing authorization and a compatible stable version. Use update operation/resume for partial or unknown outcomes, preserving the original transaction and backup. Only the selected current Agent is synchronized.
+
 
 以实物参考为产品事实来源，将正确产品还原到已有场景。方法是先在原图副本中完整遮挡旧产品，再按有序实物参考生成，保留场景和人物的接触关系。当前人类明确要求和宿主路由优先于应用默认值。
 

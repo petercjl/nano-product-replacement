@@ -1,19 +1,43 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import os from 'node:os';
+import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import {spawnSync} from 'node:child_process';
-import {automaticUpdateCheck,updatePolicy} from '../src/updates.mjs';
-import {install,status,targetFor} from '../src/lifecycle.mjs';
-import {PACKAGE,writeNew} from '../src/common.mjs';
-async function setup(t){const d=await fs.mkdtemp(path.join(os.tmpdir(),'nano-update-'));t.after(()=>fs.rm(d,{recursive:true,force:true}));return {d,env:{NANO_PRODUCT_REPLACEMENT_STATE_DIR:d}};}
-test('automatic detection checks once, caches and refreshes expired state',async t=>{const {d,env}=await setup(t);let calls=0;const probe=()=>{calls++;return {status:0,stdout:'"99.0.0"'};};let r=await automaticUpdateCheck({env,now:1000,probe});assert.equal(r.update_available,true);assert.equal(r.installation,'explicit-only');r=await automaticUpdateCheck({env,now:2000,probe});assert.equal(r.status,'cached');assert.equal(calls,1);await automaticUpdateCheck({env,now:1000+25*3600_000,probe});assert.equal(calls,2);assert.equal(JSON.parse(await fs.readFile(path.join(d,'update-check.json'))).package,PACKAGE);});
-test('opt-out does not create state or invoke npm',async t=>{const {d,env}=await setup(t);const r=await automaticUpdateCheck({env:{...env,NANO_PRODUCT_REPLACEMENT_UPDATE_CHECK:'0'},probe:()=>{throw Error('unexpected');}});assert.equal(r.status,'disabled');assert.deepEqual(await fs.readdir(d),[]);assert.equal(updatePolicy(env).automatic_installation,false);});
-test('offline and thrown timeout are backed off without blocking work',async t=>{const {env}=await setup(t);let calls=0;const probe=()=>{calls++;throw Error('timeout');};assert.equal((await automaticUpdateCheck({env,now:1000,probe})).status,'unavailable');assert.equal((await automaticUpdateCheck({env,now:2000,probe})).status,'cached');assert.equal(calls,1);});
-test('malformed cache is preserved',async t=>{const {d,env}=await setup(t),file=path.join(d,'update-check.json');await writeNew(file,'user-owned');const r=await automaticUpdateCheck({env,probe:()=>{throw Error();}});assert.equal(r.status,'unmanaged-cache');assert.equal(await fs.readFile(file,'utf8'),'user-owned');});
-test('concurrent checks invoke only one probe',async t=>{const {env}=await setup(t);let signal,finish;const started=new Promise(r=>signal=r),done=new Promise(r=>finish=r);const first=automaticUpdateCheck({env,probe:async()=>{signal();await done;return {status:0,stdout:'"99.0.0"'};}});await started;const second=await automaticUpdateCheck({env,probe:()=>{throw Error('duplicate');}});assert.equal(second.status,'concurrent-check');finish();assert.equal((await first).status,'checked');});
-test('old owned lock is recoverable, unrelated lock is preserved',async t=>{const {d,env}=await setup(t),file=path.join(d,'update-check.lock');await writeNew(file,JSON.stringify({package:PACKAGE,created_at:1000}));assert.equal((await automaticUpdateCheck({env,now:100000,probe:()=>({status:0,stdout:'"99.0.0"'})})).status,'checked');await writeNew(file,'user lock');assert.equal((await automaticUpdateCheck({env,now:100000+25*3600_000,probe:()=>{throw Error();}})).status,'concurrent-check');assert.equal(await fs.readFile(file,'utf8'),'user lock');});
-test('older latest version is not presented as an available upgrade',async t=>{const {env}=await setup(t);assert.equal((await automaticUpdateCheck({env,probe:()=>({status:0,stdout:'"0.0.0"'})})).update_available,false);});
-test('generic host explicit destination installs canonical Skill and preserves ownership',async t=>{const {d}=await setup(t),targetDirectory=path.join(d,'own-skills','nano-product-replacement');const args={agent:'custom-agent',targetDirectory,mode:'copy'};let r=await install(args);assert.equal(r.managed,true);assert.equal(r.target,targetDirectory);assert.equal((await install(args)).changed,false);assert.equal((await status(args)).up_to_date,true);assert.equal((await install({...args,update:true})).changed,false);assert.throws(()=>targetFor('../bad',null,targetDirectory),{code:'UNKNOWN_TARGET'});assert.throws(()=>targetFor('custom-agent'),{code:'UNKNOWN_TARGET'});assert.throws(()=>targetFor('codex',d,targetDirectory),{code:'INVALID_INPUT'});const foreign=path.join(d,'foreign');await fs.mkdir(foreign);await writeNew(path.join(foreign,'mine'),'owned');await assert.rejects(install({...args,targetDirectory:foreign}),{code:'UNMANAGED_TARGET'});});
-test('ordinary CLI entry exposes disabled policy; source discovery creates no update state',async t=>{const {d,env}=await setup(t),cli=path.resolve('bin/nano-product-replacement.mjs');const call=(...args)=>spawnSync(process.execPath,[cli,...args],{encoding:'utf8',env:{...process.env,...env,NANO_PRODUCT_REPLACEMENT_UPDATE_CHECK:'0'}});assert.equal(JSON.parse(call('update','status').stdout).policy.enabled,false);assert.equal(JSON.parse(call('skill','source').stdout).ok,true);assert.deepEqual(await fs.readdir(d),[]);const r=call('inspect','--source','missing','--source','again','--output-directory','out');assert.equal(r.status,1);assert.equal(JSON.parse(r.stderr).error.code,'INVALID_INPUT');});
+import * as life from '../lifecycle/engine.mjs';
+const temp=t=>{const dir=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'managed-lifecycle-')));const key=life.config.env+'_STATE_DIR',prev=process.env[key];process.env[key]=path.join(dir,'state');t.after(()=>{if(prev===undefined)delete process.env[key];else process.env[key]=prev;fs.rmSync(dir,{recursive:true,force:true});});return dir;};
+const target=(dir,name='target')=>life.resolveTarget({agent:'future-agent',path:path.join(dir,name)});
+const run=(args,env={})=>spawnSync(process.execPath,[path.join(life.root,life.config.entry),...args],{encoding:'utf8',timeout:90000,env:{...process.env,[life.config.env+'_AUTO_UPDATE']:'0',...env}});
+
+test('automatic detection defaults to notify, caches persistently, handles offline and opt-out',async t=>{
+ const autoKey=life.config.env+'_AUTO_UPDATE',autoPrev=process.env[autoKey];process.env[autoKey]='1';t.after(()=>{if(autoPrev===undefined)delete process.env[autoKey];else process.env[autoKey]=autoPrev;});
+ const dir=temp(t),r=target(dir);const key=life.config.env+'_STATE_DIR',prev=process.env[key];process.env[key]=path.join(dir,'state');t.after(()=>{if(prev===undefined)delete process.env[key];else process.env[key]=prev;});let calls=0;
+ const probe=async()=>{calls++;return '99.0.0';};const first=await life.automatic(r,{probe,now:10000000});assert.equal(first.state,'update-available');assert.equal(fs.existsSync(r.target),false);
+ assert.equal((await life.automatic(r,{probe,now:10000001})).state,'cached');assert.equal(calls,1);
+ const offline=await life.automatic(r,{probe:async()=>{throw Error('offline');},now:200000000});assert.equal(offline.state,'offline');
+ assert.equal(life.policy({mode:'off',yes:true},r).mode,'off');assert.equal((await life.automatic(r,{probe})).state,'disabled');
+});
+test('automatic installation requires independent authorization and compatible stable versions',t=>{
+ const dir=temp(t),r=target(dir);assert.equal(life.compatible('0.6.9','0.6.8'),true);assert.equal(life.compatible('0.7.0','0.6.8'),false);assert.equal(life.compatible('2.0.0','1.9.0'),false);assert.equal(life.compatible('1.9.1','1.9.0'),true);assert.equal(life.compatible('1.9.1-beta.0','1.9.0'),false);
+ assert.throws(()=>life.policy({mode:'auto'},r),{code:'PERMISSION_REQUIRED'});assert.throws(()=>life.policy({mode:'auto',yes:true}),{code:'TARGET_PATH_REQUIRED'});
+});
+
+test('generic and arbitrary named hosts require explicit own destination before any mutation',t=>{
+ const dir=temp(t);for(const agent of ['generic','codex','sealseek','future-agent']){
+  assert.throws(()=>life.resolveTarget({agent}),{code:'TARGET_PATH_REQUIRED'});
+  assert.equal(life.resolveTarget({agent,path:path.join(dir,agent)}).agent,agent);
+ }
+ for(const agent of ['../host','Bad Agent','__proto__',''])assert.throws(()=>life.resolveTarget({agent,path:path.join(dir,'x')}),{code:'INVALID_TARGET'});
+ assert.throws(()=>life.resolveTarget({path:dir,root:dir}),{code:'CONFLICTING_TARGET'});
+ const before=fs.readdirSync(dir);const r=run(['update','install','--yes','--agent','future-agent','--json']);assert.equal(r.status,1);assert.equal(JSON.parse(r.stdout).code,'TARGET_PATH_REQUIRED');assert.deepEqual(fs.readdirSync(dir),before);
+});
+test('bootstrap source, duplicate and unknown arguments are read-only',t=>{
+ const dir=temp(t),r=run(['skill','source','--json']);assert.equal(r.status,0,r.stderr+r.stdout);const body=JSON.parse(r.stdout);assert.equal(body.source,life.source);assert.equal(body.installationLifecycle.agentNeutral,true);
+ for(const a of [['skill','install','--path',dir,'--path',dir],['skill','install','--wat'],['skill','install','--path'],['skill','source','--root',dir],['skill','install','extra','--path',dir]])assert.equal(run(a).status,1,JSON.stringify(a));
+ assert.equal(run(['skill','install','--help']).status,0);assert.deepEqual(fs.readdirSync(dir),[]);
+});
+
+test('read-only status and version reject mutating or unknown flags before writing',t=>{
+ const dir=temp(t),before=fs.readdirSync(dir);const r=run(['update','status','--path',path.join(dir,'target'),'--mode','auto','--yes']);assert.equal(r.status,1);assert.equal(JSON.parse(r.stdout).code,'INVALID_ARGUMENT');assert.deepEqual(fs.readdirSync(dir),before);
+ const version=run(['version','--unknown']);assert.equal(version.status,1);assert.equal(JSON.parse(version.stdout).code,'INVALID_ARGUMENT');
+});

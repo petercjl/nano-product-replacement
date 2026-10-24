@@ -40,7 +40,7 @@
       ],
       "implementation": {
         "kind": "cli",
-        "instructions": "Use nano-product-replacement doctor, capabilities, inspect, blackout and collect. Resolve the installed CLI and verify required features. Use inspect coordinate/overlay/crop artifacts and shared polygon validation; ordinary runs do not import package dependencies or write image algorithms."
+        "instructions": "Use nano-product-replacement doctor, capabilities, inspect, blackout and collect. Resolve this installed Skill’s local scripts/run.mjs and verify required features. Use inspect coordinate/overlay/crop artifacts and shared polygon validation; ordinary runs do not import package dependencies or write image algorithms."
       }
     },
     {
@@ -53,7 +53,7 @@
       ],
       "implementation": {
         "kind": "instruction",
-        "instructions": "Follow current human choice and host routing. Codex uses built-in image generation by default; explicit SealSeek selection dynamically loads sealseek-media via its skill source contract. Preserve model intent; if unavailable return FEATURE_UNSUPPORTED. Normalize real returned task IDs and artifacts."
+        "instructions": "Follow current human choice and host routing. Follow the current host routing; explicit SealSeek selection dynamically loads sealseek-media via its skill source contract. Preserve model intent; if unavailable return FEATURE_UNSUPPORTED. Normalize real returned task IDs and artifacts."
       }
     }
   ],

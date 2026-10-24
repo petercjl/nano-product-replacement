@@ -1,6 +1,6 @@
 {
   "name": "@petercjl/nano-product-replacement",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Reference-based product replacement workflow with portable local masking and managed Agent Skills.",
   "type": "module",
   "bin": {
@@ -13,7 +13,11 @@
     "capabilities.json",
     "README.md",
     "LICENSE",
-    "skill-integrity.json"
+    "skill-integrity.json",
+    "lifecycle",
+    "INSTALL.md",
+    "UPDATE.md",
+    "release-integrity.json"
   ],
   "engines": {
     "node": ">=22"
@@ -31,10 +35,24 @@
     "access": "public"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs",
-    "check": "node --check bin/nano-product-replacement.mjs && npm test"
+    "test": "node --test --test-concurrency=2 test/*.test.mjs",
+    "check": "node --check bin/nano-product-replacement.mjs && npm test",
+    "validate:release": "node lifecycle/validate-release.mjs",
+    "prepack": "node lifecycle/validate-release.mjs",
+    "postinstall": "node lifecycle/notice.mjs",
+    "version": "node lifecycle/version.mjs",
+    "verify:packed": "node scripts/verify-packed.mjs",
+    "verify:historical": "node scripts/verify-historical.mjs"
   },
   "dependencies": {
-    "sharp": "0.35.5"
+    "sharp": "0.35.5",
+    "yaml": "2.9.1"
+  },
+  "skillLifecycle": {
+    "skill": "nano-product-replacement",
+    "entry": "bin/nano-product-replacement.mjs",
+    "env": "NANO_PRODUCT_REPLACEMENT",
+    "legacyMarker": ".nano-install.json",
+    "contract": 2
   }
 }

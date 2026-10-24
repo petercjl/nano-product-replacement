@@ -37,7 +37,6 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm test
-      - run: node scripts/packed-smoke.mjs
   publish:
     needs: qa
     runs-on: ubuntu-latest

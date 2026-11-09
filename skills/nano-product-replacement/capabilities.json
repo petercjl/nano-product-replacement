@@ -77,7 +77,8 @@
         "comparison-sheet",
         "coordinate-inspection",
         "simple-polygon-validation",
-        "local-warm-pixel-protection"
+        "local-warm-pixel-protection",
+        "outward-feather"
       ],
       "input_fields": [
         "request"

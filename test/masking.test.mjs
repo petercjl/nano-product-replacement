@@ -7,7 +7,7 @@ import {spawnSync} from 'node:child_process';
 import sharp from 'sharp';
 import {blackout} from '../src/images.mjs';
 import {inspect} from '../src/inspect.mjs';
-import {validateRegions} from '../src/regions.mjs';
+import {validateRegions,regionMasks} from '../src/regions.mjs';
 import {writeNew,hash} from '../src/common.mjs';
 process.env.NANO_PRODUCT_REPLACEMENT_UPDATE_CHECK='0';
 
@@ -46,3 +46,46 @@ test('inspect scales crop coordinates from declared coordinate system',async t=>
 test('inspect rejects invalid checks before creating directory',async t=>{const a=await setup(t,{...base,check_areas:[{id:'../escape',rect:[0,0,10,10]}]}),outputDirectory=path.join(a.d,'i');await assert.rejects(inspect({...a,outputDirectory}),{code:'INVALID_REGIONS'});await assert.rejects(fs.stat(outputDirectory),{code:'ENOENT'});});
 test('CLI inspect creates discoverable coordinate artifacts',async t=>{const a=await setup(t);const r=spawnSync(process.execPath,[path.resolve('bin/nano-product-replacement.mjs'),'inspect','--source',a.source,'--output-directory',path.join(a.d,'cli'),'--json'],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);const j=JSON.parse(r.stdout);assert.equal(j.width,100);assert.ok(await fs.stat(path.join(j.output_directory,'coordinate-grid.png')));});
 test('CLI rejects misplaced options and positional arguments',()=>{for(const args of [['inspect','--output','some.png'],['blackout','unexpected'],['collect','--regions','some.json']]){const r=spawnSync(process.execPath,[path.resolve('bin/nano-product-replacement.mjs'),...args],{encoding:'utf8'});assert.equal(r.status,1);assert.ok(['UNKNOWN_OPTION','INVALID_INPUT'].includes(JSON.parse(r.stderr).error.code));}});
+
+test('default feather uses oriented source pixels with an explicit hard-edge override',()=>{
+ const {feather,...automatic}=base;
+ assert.equal(validateRegions(automatic,2000,1600).feather,16);
+ assert.equal(validateRegions(automatic,1500,1200).feather,12);
+ assert.equal(validateRegions(automatic,12000,9600).feather,80);
+ assert.equal(validateRegions({...automatic,feather:0},2000,1600).feather,0);
+ for(const invalid of [-1,1.5,81,'15'])assert.throws(()=>validateRegions({...automatic,feather:invalid},100,80),{code:'INVALID_REGIONS'});
+});
+
+test('feather cannot reveal any pixel of the hard mask and transitions outside it',async()=>{
+ const rgba=Buffer.alloc(100*80*4,255);
+ const input={...base,cover:[{points:[[20,20],[80,20],[80,65],[20,65]],grow:0}]};
+ const hard=await regionMasks(validateRegions(input,100,80),rgba);
+ const soft=await regionMasks(validateRegions({...input,feather:4},100,80),rgba);
+ for(let i=0;i<hard.mask.length;i++)assert.ok(soft.mask[i]>=hard.mask[i]);
+ for(let y=20;y<65;y++)for(let x=20;x<80;x++)assert.equal(soft.mask[y*100+x],255);
+ assert.ok(soft.mask[40*100+15]>0&&soft.mask[40*100+15]<255);
+ assert.equal(soft.mask[40*100+2],0);
+ assert.equal(soft.mask[2*100+50],0);
+});
+
+test('saved feathered mask describes the actual darkening including protected edges',async t=>{
+ const a=await setup(t,{...base,feather:3,protect:[{points:[[30,20],[65,20],[65,60],[30,60]]}]});
+ const before=hash(await fs.readFile(a.source));await blackout(a);
+ const source=await sharp(a.source).removeAlpha().raw().toBuffer();
+ const output=await sharp(a.output).removeAlpha().raw().toBuffer();
+ const mask=await sharp(a.maskOutput).greyscale().raw().toBuffer();
+ for(let i=0;i<mask.length;i++)for(let c=0;c<3;c++)assert.equal(output[i*3+c],Math.round(source[i*3+c]*(1-mask[i]/255)));
+ assert.ok(mask[40*100+31]>0);
+ assert.equal(mask[40*100+48],0);
+ assert.equal(hash(await fs.readFile(a.source)),before);
+ const view=await inspect({...a,outputDirectory:path.join(a.d,'feather-preview')});
+ const overlay=await sharp(path.join(view.output_directory,'regions-overlay.png')).removeAlpha().raw().toBuffer();
+ assert.ok(overlay[(40*100+9)*3]>source[(40*100+9)*3]);
+ assert.equal(view.mask_fraction,mask.reduce((s,v)=>s+v/255,0)/mask.length);
+});
+
+test('feather remains valid at image boundaries and accepts the maximum radius',async()=>{
+ const rgba=Buffer.alloc(100*80*4,255);
+ const cfg=validateRegions({...base,cover:[{points:[[0,0],[20,0],[20,20],[0,20]],grow:0}],feather:80},100,80);
+ const {mask}=await regionMasks(cfg,rgba);assert.equal(mask.length,8000);assert.equal(mask[0],255);assert.equal(mask[10*100+10],255);
+});

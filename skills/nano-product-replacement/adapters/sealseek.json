@@ -36,11 +36,12 @@
         "comparison-sheet",
         "coordinate-inspection",
         "simple-polygon-validation",
-        "local-warm-pixel-protection"
+        "local-warm-pixel-protection",
+        "outward-feather"
       ],
       "implementation": {
         "kind": "cli",
-        "instructions": "Use nano-product-replacement doctor, capabilities, inspect, blackout and collect. Resolve this installed Skill’s local scripts/run.mjs and verify required features. Use inspect coordinate/overlay/crop artifacts and shared polygon validation; ordinary runs do not import package dependencies or write image algorithms."
+        "instructions": "Use this installed Skill's scripts/run.mjs with the active Node.js runtime for doctor, capabilities, blackout and collect. Draw ordered polygon vertices from the actual source; inspect provides optional orientation, coordinates, overlays and crops when needed. The default feather expands outside the hard mask after protection; view the actual result, including contact edges. Ordinary runs do not import package internals or write pixel algorithms."
       }
     },
     {
@@ -53,7 +54,7 @@
       ],
       "implementation": {
         "kind": "instruction",
-        "instructions": "Follow current human choice and host routing. Follow the current host routing; explicit SealSeek selection dynamically loads sealseek-media via its skill source contract. Preserve model intent; if unavailable return FEATURE_UNSUPPORTED. Normalize real returned task IDs and artifacts."
+        "instructions": "Preserve explicit user choices and host routing. The application default is SealSeek Nano Banana Pro, 2K, four results in one batch. Resolve and fully read the current sealseek-media Skill through its source contract; verify the live model and ordered-reference capabilities. Return FEATURE_UNSUPPORTED for missing required features. Resume uncertain tasks; do not automatically submit extra paid batches."
       }
     }
   ],

@@ -21,9 +21,13 @@ export async function inspect({source,regions,outputDirectory}) {
  const entries=[['oriented.png',oriented],['coordinate-grid.png',gridPNG]];
  const crops=[];let coverage=null;
  if(cfg){
-  const {cover,protect,mask}=await regionMasks(cfg,decoded.data);
+  const {protect,mask}=await regionMasks(cfg,decoded.data);
   const overlay=Buffer.from(decoded.data);
-  for(let i=0;i<mask.length;i++){const j=i*4;let color=null,a=0;if(cover[i]){color=[255,0,255];a=.45*cover[i]/255;}if(protect[i]){color=[0,255,70];a=.6*protect[i]/255;}if(color){for(let c=0;c<3;c++)overlay[j+c]=Math.round(overlay[j+c]*(1-a)+color[c]*a);}}
+  const pink=[255,0,255],green=[0,255,70];
+  for(let i=0;i<mask.length;i++){
+   const j=i*4,covered=.45*mask[i]/255,kept=.6*protect[i]/255*(1-mask[i]/255);
+   for(let c=0;c<3;c++)overlay[j+c]=Math.round((overlay[j+c]*(1-covered)+pink[c]*covered)*(1-kept)+green[c]*kept);
+  }
   entries.push(['regions-overlay.png',await sharp(overlay,{raw}).png().toBuffer()]);
   const automatic=cfg.protect.map((p,i)=>{const xs=p.points.map(a=>a[0]),ys=p.points.map(a=>a[1]);return {id:`protect-${i+1}`,rect:[Math.min(...xs),Math.min(...ys),Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys)],padding:Math.max(12,Math.min(width,height)*.02)};});
   for(const c of [...automatic,...cfg.check_areas.map(c=>({...c,id:`check-${c.id}`,padding:0}))]){

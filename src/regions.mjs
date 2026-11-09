@@ -42,8 +42,8 @@ export function validateRegions(cfg,width,height) {
  if(cfg.cover.length+(cfg.protect?.length??0)>256)fail('INVALID_REGIONS','At most 256 polygons.');
  const sx=width/cw,sy=height/ch;
  if(Math.abs(sx/sy-1)>.005)fail('INVALID_REGIONS','Coordinate aspect ratio differs from the oriented image.');
- const feather=cfg.feather??0;
- if(!Number.isInteger(feather)||feather<0||feather>20)fail('INVALID_REGIONS','feather must be an integer from 0 to 20.');
+ const feather=cfg.feather??Math.min(80,Math.round(Math.min(width,height)*.01));
+ if(!Number.isInteger(feather)||feather<0||feather>80)fail('INVALID_REGIONS','feather must be an integer from 0 to 80.');
  const checks=cfg.check_areas??[];
  if(!Array.isArray(checks)||checks.length>32)fail('INVALID_REGIONS','check_areas must contain at most 32 rectangles.');
  const ids=new Set();
@@ -59,8 +59,7 @@ async function raster(polys,cfg) {
  return sharp(svg).removeAlpha().greyscale().raw().toBuffer();
 }
 export async function regionMasks(cfg,rgba) {
- let cover=await raster(cfg.cover,cfg);
- if(cfg.feather)cover=await sharp(cover,{raw:{width:cfg.width,height:cfg.height,channels:1}}).blur(Math.max(.3,cfg.feather/2)).greyscale().raw().toBuffer();
+ const cover=await raster(cfg.cover,cfg);
  const protect=Buffer.alloc(cover.length);
  for(const p of cfg.protect){const local=await raster([p],cfg);for(let i=0;i<local.length;i++){
   if(!local[i])continue;
@@ -68,5 +67,13 @@ export async function regionMasks(cfg,rgba) {
   protect[i]=Math.max(protect[i],local[i]);
  }}
  const mask=Buffer.from(cover);for(let i=0;i<mask.length;i++)mask[i]=Math.round(mask[i]*(1-protect[i]/255));
+ if(cfg.feather){
+  // Expand the white selection after protection, then soften only outside the hard mask.
+  // Sharp morphology treats black as foreground: erode expands the white mask.
+  const seed=mask.map(v=>v?255:0);
+  const soft=await sharp(seed,{raw:{width:cfg.width,height:cfg.height,channels:1}})
+   .erode(cfg.feather).blur(Math.max(.6,cfg.feather/2)).greyscale().raw().toBuffer();
+  for(let i=0;i<mask.length;i++)mask[i]=Math.max(mask[i],soft[i]);
+ }
  return {cover,protect,mask};
 }
